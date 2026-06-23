@@ -1,0 +1,143 @@
+<!doctype html><html lang="ko"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>AI 커리어 무기 진단</title>
+<style>
+:root{--pri:#5B5BD6;--pri2:#7B6CF6;--y:#FFD200;--ink:#16161d;--mut:#7a7a86;--bg:#f4f4f8;--line:#ececf2;}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{background:#d9d9e3;font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',sans-serif;color:var(--ink)}
+.phone{max-width:420px;margin:0 auto;min-height:100vh;background:var(--bg);position:relative;overflow:hidden}
+.bar{height:54px;display:flex;align-items:center;justify-content:center;background:#fff;border-bottom:1px solid var(--line);font-weight:800;font-size:15px;position:sticky;top:0;z-index:5}
+.bar .badge{position:absolute;right:12px;font-size:10px;font-weight:700;color:#fff;background:var(--pri);padding:3px 7px;border-radius:6px}
+.wrap{padding:22px 18px 120px}
+.prog{height:6px;background:#e3e3ec;border-radius:99px;overflow:hidden;margin-bottom:18px}
+.prog>i{display:block;height:100%;background:linear-gradient(90deg,var(--pri),var(--pri2));width:0;transition:.3s}
+.step{font-size:12px;color:var(--mut);font-weight:700;margin-bottom:6px}
+.q{font-size:20px;font-weight:800;line-height:1.4;margin-bottom:18px;letter-spacing:-.3px}
+.opt{display:flex;align-items:center;gap:10px;background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:15px 14px;margin-bottom:10px;font-size:14.5px;font-weight:600;cursor:pointer;transition:.15s;line-height:1.35}
+.opt:active{transform:scale(.99)}
+.opt.sel{border-color:var(--pri);background:#f1f0fe}
+.opt .n{flex:none;width:24px;height:24px;border-radius:50%;background:#eee;color:#888;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800}
+.opt.sel .n{background:var(--pri);color:#fff}
+.nav{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:100%;max-width:420px;display:flex;gap:10px;padding:14px 18px;background:#fff;border-top:1px solid var(--line)}
+.btn{flex:1;border:0;border-radius:13px;padding:16px;font-size:16px;font-weight:800;cursor:pointer}
+.btn.ghost{flex:none;width:78px;background:#eee;color:#555}
+.btn.main{background:var(--pri);color:#fff}
+.btn.main:disabled{background:#c9c9d6}
+.btn.cta{background:var(--y);color:#1a1a1a;box-shadow:0 6px 18px rgba(255,210,0,.4)}
+/* intro */
+.hero{padding:54px 22px 30px;text-align:center;background:radial-gradient(120% 70% at 50% 0,#6a5bf6,#4b3fd6 60%,#3a2fb0);color:#fff;border-radius:0 0 26px 26px}
+.hero .kick{display:inline-block;background:rgba(255,255,255,.18);font-size:12px;font-weight:700;padding:5px 12px;border-radius:99px;margin-bottom:16px}
+.hero h1{font-size:30px;font-weight:800;letter-spacing:-1px;line-height:1.25}
+.hero h1 b{color:var(--y)}
+.hero p{margin-top:12px;font-size:15px;opacity:.9}
+.hero .meta{margin-top:18px;font-size:12.5px;opacity:.8}
+.icard{margin:18px;background:#fff;border-radius:16px;padding:18px}
+.icard h3{font-size:14px;margin-bottom:10px}
+.icard ul{list-style:none;font-size:13.5px;color:#555;line-height:1.9}
+.icard li::before{content:"✓ ";color:var(--pri);font-weight:800}
+/* result */
+.rwrap{padding-bottom:120px}
+.rhero{padding:34px 22px;text-align:center;color:#fff;background:radial-gradient(120% 70% at 50% 0,#6a5bf6,#4b3fd6 65%,#3a2fb0);border-radius:0 0 26px 26px}
+.rhero .lvl{font-size:13px;font-weight:700;opacity:.85}
+.rhero .name{font-size:27px;font-weight:800;margin:8px 0;letter-spacing:-.5px;color:var(--y)}
+.rhero .score{font-size:15px;opacity:.92}
+.rhero .pct{margin-top:14px;display:inline-block;background:rgba(255,255,255,.16);padding:7px 14px;border-radius:99px;font-size:13px;font-weight:700}
+.sec{margin:16px;background:#fff;border-radius:16px;padding:18px}
+.sec h3{font-size:14px;margin-bottom:14px;font-weight:800}
+.barrow{margin-bottom:12px}
+.barrow .lab{display:flex;justify-content:space-between;font-size:12.5px;font-weight:700;margin-bottom:5px}
+.barrow .track{height:9px;background:#eee;border-radius:99px;overflow:hidden}
+.barrow .fill{height:100%;background:linear-gradient(90deg,var(--pri),var(--pri2));border-radius:99px}
+.barrow.weak .fill{background:linear-gradient(90deg,#ff6b6b,#ff8e53)}
+.barrow.weak .lab b{color:#ef4444}
+.rec{border:1.5px solid var(--line);border-radius:13px;padding:13px;margin-bottom:9px}
+.rec .t{font-size:12px;color:var(--pri);font-weight:800;margin-bottom:5px}
+.rec .c{font-size:14px;font-weight:700;line-height:1.45}
+.note{font-size:11px;color:var(--mut);margin:0 16px;line-height:1.6}
+.hide{display:none}
+</style></head><body><div class="phone" id="app"></div>
+<script>
+var STATES=["재직 중(직장인)","구직·취업 준비 중","이직 준비 중","자영업·프리랜서","창업·예비창업","경력단절 후 재취업 준비","학생(대학·수험)","기타"];
+var Q=[
+{p:1,t:"생성형 AI가 어떻게 답을 만들어내는지 이해하고 있나요?",o:["전혀 모른다","막연히 안다","대략적인 원리는 이해한다","원리와 한계까지 설명할 수 있다"]},
+{p:1,t:"AI가 내놓은 답변을 받으면 어떻게 하나요?",o:["그대로 가져다 쓴다","대충 훑어보고 쓴다","사실인지 한 번 확인한다","교차검증·출처확인까지 한 뒤 쓴다"]},
+{p:2,t:"AI에게 일을 시킬 때 어떤 방식으로 지시하나요?",o:["거의 일을 시키지 않는다","한 줄로 짧게 물어본다","형식·조건·예시를 적어 지시한다","단계로 나눠 지시하고 검증·재지시한다"]},
+{p:2,t:"원하는 답이 나오지 않으면 어떻게 하나요?",o:["그냥 포기한다","마음에 안 들어도 그대로 쓴다","질문을 바꿔 다시 시도한다","맥락·역할·예시를 더해 정교하게 다듬는다"]},
+{p:3,t:"문서 작업(보고서·이메일·기획서 등)에 AI를 어떻게 활용하나요?",o:["전혀 쓰지 않는다","아이디어·참고용으로만 쓴다","초안을 만든 뒤 직접 다듬어 완성한다","나에게 맞게 커스터마이즈·자동화한다"]},
+{p:3,t:"엑셀·표 같은 데이터를 다룰 때 AI를 어떻게 활용하나요?",o:["전혀 쓰지 않는다","표를 복사·붙여넣는 정도로만 쓴다","정리·계산에 가끔 활용한다","분석·차트·인사이트 추출까지 활용한다"]},
+{p:3,t:"새로운 과제(프로젝트)를 받으면 어떻게 시작하나요?",o:["혼자 직접 처리한다","하다가 나중에 AI를 떠올린다","시작할 때 바로 AI 활용을 검토한다","처음부터 AI를 전제로 프로세스를 설계한다"]},
+{p:3,t:"AI를 활용한 결과를 실제 성과로 연결하고 있나요?",o:["거의 연결하지 못한다","연결되는 경우가 드물다","가끔 성과로 이어진다","꾸준히 눈에 띄는 성과를 만든다"]},
+{p:4,t:"반복되는 업무를 효율화할 때 어떻게 하나요?",o:["매번 수작업으로 처리한다","불편함만 느끼고 둔다","일부 작업을 AI로 단축한다","자동화 시스템으로 흐름을 구축한다"]},
+{p:4,t:"AI 에이전트·바이브코딩(자연어 코딩)을 어느 정도 다루나요?",o:["무엇인지 모른다","이름은 들어봤다","무엇인지 이해하고 있다","유료 툴·커스텀으로 실제 업무에 적용해봤다"]},
+{p:0,t:"AI 역량을 커리어·미래가치(수익화·취업·승진)에 어떻게 연결하고 있나요?",o:["별로 관심이 없다","막연히 관심만 있다","구체적으로 준비하고 있다","적극 투자하며 이미 시도·실행 중이다"],intent:true}
+];
+var REC={1:{t:"기초·리터러시",c:"[챗GPT] 올인원 입문 · AI처럼 생각하라(컴퓨팅 사고력)"},
+2:{t:"프롬프트",c:"ChatGPT 프롬프트 마스터 클래스 · 프롬프트 엔지니어링"},
+3:{t:"실무·데이터",c:"칼퇴 OA 치트키(엑셀/PPT) · ChatGPT 데이터 리터러시 · AI 활용 프레젠테이션"},
+4:{t:"자동화·고도화",c:"Agentic AI 업무순삭 · AI 업무 자동화(비개발자) · n8n 콘텐츠 자동화"}};
+var ans={state:null,q:Array(11).fill(null)};
+var idx=-1; // -1 intro, 0..11 questions(11번=Q index of state? handle separately), 100 result
+var step=0; // 0=intro,1=state,2..12=Q0..Q10,13=result
+function render(){var a=document.getElementById('app');
+ if(step===0){a.innerHTML=intro();return;}
+ if(step===13){a.innerHTML=result();return;}
+ a.innerHTML=ques();
+}
+function intro(){return `<div class="hero"><span class="kick">에듀윌 AI CLASS · 프로토타입</span>
+ <h1>AI 커리어 <b>무기</b> 진단</h1><p>내 AI 일머리, 얼마나 될까?</p>
+ <div class="meta">📝 12문항 · ⏱ 약 2분 · 🔒 로그인 기반(데모)</div></div>
+ <div class="icard"><h3>이런 걸 알려드려요</h3><ul>
+ <li>내 AI 활용 등급 & 점수</li><li>또래·직무 대비 내 위치</li><li>약점 보강 맞춤 강좌 추천</li></ul></div>
+ <div class="nav"><button class="btn cta" onclick="step=1;render()">무료로 진단 시작하기</button></div>`;}
+function ques(){
+ var total=12, cur=step-1; // step1=state(cur0)...step12=Q10(cur11)
+ var pct=Math.round(cur/total*100);
+ var head=`<div class="bar">AI 커리어 무기 진단<span class="badge">DEMO</span></div>
+  <div class="wrap"><div class="prog"><i style="width:${pct}%"></i></div><div class="step">${cur+1} / ${total}</div>`;
+ if(step===1){ // state
+  var opts=STATES.map((s,i)=>`<div class="opt ${ans.state===i?'sel':''}" onclick="ans.state=${i};render()"><span class="n">${i+1}</span>${s}</div>`).join('');
+  return head+`<div class="q">현재 본인의 상태에 가장 가까운 것은?</div>${opts}</div>`+navHtml(ans.state!==null);
+ }
+ var qi=step-2; var q=Q[qi];
+ var opts=q.o.map((o,i)=>`<div class="opt ${ans.q[qi]===i?'sel':''}" onclick="ans.q[${qi}]=${i};render()"><span class="n">${i+1}</span>${o}</div>`).join('');
+ var partlab=q.p===0?"미래가치":("파트"+q.p);
+ return head+`<div class="q">${q.t}</div>${opts}</div>`+navHtml(ans.q[qi]!==null);
+}
+function navHtml(can){return `<div class="nav">${step>1?'<button class="btn ghost" onclick="step--;render()">이전</button>':''}
+ <button class="btn main" ${can?'':'disabled'} onclick="next()">${step===12?'결과 보기':'다음'}</button></div>`;}
+function next(){ if(step<12){step++;render();} else {step=13;render();} }
+function result(){
+ var sc=0; for(var i=0;i<10;i++){sc+=(ans.q[i]||0)+1;} // Q1~Q10 (index0~9) 1~4점
+ var parts={1:{s:0,m:0},2:{s:0,m:0},3:{s:0,m:0},4:{s:0,m:0}};
+ for(var i=0;i<10;i++){var p=Q[i].p;parts[p].s+=(ans.q[i]||0)+1;parts[p].m+=4;}
+ var lvl = sc<=17?["AI 무방비",0]: sc<=27?["가성비 좋은 AI 보조 사수",1]: sc<=35?["사수보다 일 잘하는 AI 파워유저",2]:["AI 커리어 무기 장착 완료",3];
+ var pctile=[12,38,72,93][lvl[1]]; // demo 백분위
+ // weakest part
+ var weak=1,wr=2; for(var p=1;p<=4;p++){var r=parts[p].s/parts[p].m; if(r<wr){wr=r;weak=p;}}
+ var pn={1:"리터러시·검증",2:"프롬프트 제어",3:"실무·데이터 활용",4:"고도화·자동화"};
+ function bar(p){var r=Math.round(parts[p].s/parts[p].m*100);var w=(p===weak)?'weak':'';
+  return `<div class="barrow ${w}"><div class="lab"><b>파트${p}. ${pn[p]}</b><span>${r}%</span></div><div class="track"><div class="fill" style="width:${r}%"></div></div></div>`;}
+ var intent=ans.q[10]||0; // Q11 index10
+ // recommend: weakest part + intent + state
+ var recs=[REC[weak]];
+ if(intent>=2)recs.push({t:"수익화·부업",c:"1인 브랜딩 AI 바이브코딩 · 노션 수익화 · 자동매매 시스템"});
+ var st=ans.state;
+ if(st===1)recs.push({t:"취업 맞춤",c:"AI 활용 취업 마스터 클래스"});
+ else if(st===3||st===4)recs.push({t:"자영업 맞춤",c:"소상공인 AI 홍보 콘텐츠 · [중개업 AI] 부동산 마케팅 자동화"});
+ else if(st===5)recs.push({t:"실무 복귀",c:"칼퇴 OA 치트키 · 직장인의 무기가 되는 챗GPT"});
+ if(lvl[1]>=2)recs.push({t:"한 단계 위로",c:"최상위 일잘러 AI 활용법 · AICE 자격 대비반"});
+ var recHtml=recs.slice(0,3).map(r=>`<div class="rec"><div class="t">${r.t}</div><div class="c">${r.c}</div></div>`).join('');
+ var snm=ans.state!=null?STATES[ans.state]:"";
+ return `<div class="rwrap"><div class="rhero"><div class="lvl">나의 등급</div>
+  <div class="name">${lvl[0]}</div><div class="score">${sc} / 40점</div>
+  <div class="pct">${snm} 중 상위 ${100-pctile}% · 내 AI 일머리 ${sc*2.5|0}점</div></div>
+  <div class="sec"><h3>📊 파트별 역량</h3>${bar(1)}${bar(2)}${bar(3)}${bar(4)}
+   <p style="font-size:12.5px;color:#666;margin-top:8px">가장 약한 영역은 <b style="color:#ef4444">파트${weak}. ${pn[weak]}</b> 예요. 여기만 잡으면 한 단계 점프!</p></div>
+  <div class="sec"><h3>🎯 당신에게 추천하는 강좌</h3>${recHtml}
+   <button class="btn cta" style="width:100%;margin-top:6px" onclick="alert('데모: 강좌 상세/패스 페이지로 이동')">추천 강좌 보러가기</button></div>
+  <p class="note">※ 보고용 프로토타입. 점수 구간·백분위·강좌 매핑은 잠정(파일럿/검수 후 확정).</p>
+  <div class="nav"><button class="btn ghost" onclick="ans={state:null,q:Array(11).fill(null)};step=0;render()">처음</button>
+   <button class="btn main" onclick="alert('데모: 공유하기')">결과 공유</button></div></div>`;
+}
+render();
+</script></body></html>
